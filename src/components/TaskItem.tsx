@@ -1,9 +1,10 @@
 "use client";
 
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {Task} from "@/models/task.model";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrash, faCheck} from "@fortawesome/free-solid-svg-icons";
+import ReactMarkdown from "react-markdown";
 
 /**
  * TaskItem Component
@@ -24,6 +25,22 @@ export function TaskItem({task, onUpdate, onDelete}: TaskItemProps) {
 	const [isEditingDescription, setIsEditingDescription] = useState(false);
 	const [editTitle, setEditTitle] = useState(task.title);
 	const [editDescription, setEditDescription] = useState(task.description || "");
+
+	// Sync local state when task prop changes (e.g., from Supabase real-time updates)
+	// Only update if not currently editing to avoid interfering with user input
+	useEffect(() => {
+		// Use setTimeout to defer state updates and avoid cascading render warning
+		const timer = setTimeout(() => {
+			if (!isEditingTitle) {
+				setEditTitle(task.title);
+			}
+			if (!isEditingDescription) {
+				setEditDescription(task.description || "");
+			}
+		}, 0);
+
+		return () => clearTimeout(timer);
+	}, [task.title, task.description, isEditingTitle, isEditingDescription]);
 
 	const handleToggleComplete = async () => {
 		try {
@@ -49,6 +66,12 @@ export function TaskItem({task, onUpdate, onDelete}: TaskItemProps) {
 
 	const handleSaveDescription = async () => {
 		try {
+			// Don't save if description hasn't changed
+			if (editDescription.trim() === (task.description || "").trim()) {
+				setIsEditingDescription(false);
+				return;
+			}
+
 			await onUpdate(task.id, {
 				description: editDescription.trim(),
 			});
@@ -147,9 +170,22 @@ export function TaskItem({task, onUpdate, onDelete}: TaskItemProps) {
 							<div
 								onClick={() => setIsEditingDescription(true)}
 								className="cursor-text py-1">
-								<p className="text-gray-600 text-sm whitespace-pre-wrap">
-									{task.description}
-								</p>
+								<div className="text-gray-600 text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
+									<ReactMarkdown
+										components={{
+											a: ({node, ...props}) => (
+												<a
+													{...props}
+													className="text-blue-600 hover:text-blue-800 underline"
+													target="_blank"
+													rel="noopener noreferrer"
+													onClick={(e) => e.stopPropagation()}
+												/>
+											),
+										}}>
+										{task.description}
+									</ReactMarkdown>
+								</div>
 							</div>
 						)}
 					</div>
