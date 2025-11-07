@@ -1,0 +1,29 @@
+// Prisma Schema for AI-Powered To-Do List Application
+// This replaces the raw SQL approach with type-safe migrations
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Task model matching the existing database structure
+model Task {
+  id                   String   @id @default(uuid())
+  title                String   @db.VarChar(255)
+  description          String?  @db.Text
+  completed            Boolean  @default(false)
+  enhanced             Boolean  @default(false)
+  enhancedDescription  String?  @db.Text @map("enhanced_description")
+  enhancementSteps     String[] @default([]) @map("enhancement_steps")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([completed])
+  @@index([createdAt])
+  @@map("tasks")
+}
