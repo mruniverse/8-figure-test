@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{id:
 			}`
 		);
 
-		// Trigger AI enhancement via n8n webhook (non-blocking)
+		// Trigger AI enhancement via n8n webhook
 		if (N8N_ENHANCEMENT_WEBHOOK) {
 			const webhookPayload = {
 				taskId: task.id,
@@ -52,49 +52,47 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{id:
 			};
 			console.log(`[POST /api/tasks/${id}/enhance] Sending to webhook:`, webhookPayload);
 
-			fetch(N8N_ENHANCEMENT_WEBHOOK, {
-				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify(webhookPayload),
-				signal: AbortSignal.timeout(10000), // 10 second timeout
-			})
-				.then(async (res) => {
-					const responseText = await res.text();
-					console.log(
-						`[POST /api/tasks/${id}/enhance] Webhook responded: ${res.status} ${res.statusText}`
-					);
-					console.log(
-						`[POST /api/tasks/${id}/enhance] Webhook response body:`,
-						responseText
-					);
-
-					if (!res.ok) {
-						console.error(
-							`[POST /api/tasks/${id}/enhance] Webhook returned error status: ${res.status}`
-						);
-						throw new Error(`Webhook failed with status ${res.status}`);
-					}
-
-					return responseText;
-				})
-				.catch((err) => {
-					console.error(
-						`[POST /api/tasks/${id}/enhance] Enhancement webhook failed:`,
-						err
-					);
-					// Reset isEnhancing if webhook fails
-					prisma.task
-						.update({
-							where: {id: task.id},
-							data: {isEnhancing: false},
-						})
-						.catch((e) =>
-							console.error(
-								`[POST /api/tasks/${id}/enhance] Failed to reset isEnhancing:`,
-								e
-							)
-						);
+			// Use try-catch to handle the webhook call
+			try {
+				const webhookResponse = await fetch(N8N_ENHANCEMENT_WEBHOOK, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify(webhookPayload),
+					signal: AbortSignal.timeout(10000), // 10 second timeout
 				});
+
+				const responseText = await webhookResponse.text();
+				console.log(
+					`[POST /api/tasks/${id}/enhance] Webhook responded: ${webhookResponse.status} ${webhookResponse.statusText}`
+				);
+				console.log(`[POST /api/tasks/${id}/enhance] Webhook response body:`, responseText);
+
+				if (!webhookResponse.ok) {
+					console.error(
+						`[POST /api/tasks/${id}/enhance] Webhook returned error status: ${webhookResponse.status}`
+					);
+					// Reset isEnhancing on webhook error
+					await prisma.task.update({
+						where: {id},
+						data: {isEnhancing: false},
+					});
+					return NextResponse.json(
+						{error: "Enhancement webhook failed", details: responseText},
+						{status: 500}
+					);
+				}
+			} catch (err) {
+				console.error(`[POST /api/tasks/${id}/enhance] Enhancement webhook failed:`, err);
+				// Reset isEnhancing if webhook fails
+				await prisma.task.update({
+					where: {id},
+					data: {isEnhancing: false},
+				});
+				return NextResponse.json(
+					{error: "Failed to call enhancement service"},
+					{status: 500}
+				);
+			}
 		} else {
 			console.error(
 				`[POST /api/tasks/${id}/enhance] N8N_ENHANCEMENT_WEBHOOK not configured!`
