@@ -22,6 +22,7 @@ export class SupabaseTaskRepository implements ITaskRepository {
 			title: row.title as string,
 			description: row.description as string | null,
 			isCompleted: row.is_completed as boolean,
+			enhanced: row.enhanced as boolean,
 			enhancedDescription: row.enhanced_description as string | null,
 			enhancementSteps: row.enhancement_steps
 				? JSON.parse(row.enhancement_steps as string)
@@ -150,11 +151,13 @@ export class SupabaseTaskRepository implements ITaskRepository {
 	/**
 	 * Delete a task
 	 */
-	async delete(id: string): Promise<void> {
+	async delete(id: string): Promise<boolean> {
 		const {error} = await supabase.from(this.tableName).delete().eq("id", id);
 
 		if (error) {
 			throw new Error(`Failed to delete task: ${error.message}`);
 		}
+
+		return true;
 	}
 }
