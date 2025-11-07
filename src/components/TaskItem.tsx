@@ -220,16 +220,6 @@ export function TaskItem({task, onUpdate, onDelete, onEnhance}: TaskItemProps) {
 				</button>
 			)}
 
-			{/* Show indicator when enhancing - no pulse animation, just static icon */}
-			{task.isEnhancing && (
-				<div className="px-5 bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-					<FontAwesomeIcon
-						icon={faWandMagicSparkles}
-						className="w-3.5 h-3.5 text-white"
-					/>
-				</div>
-			)}
-
 			<button
 				onClick={handleDelete}
 				className="opacity-0 group-hover:opacity-100 px-5 bg-red-500 hover:bg-red-600 transition-all flex items-center justify-center cursor-pointer rounded-r-xl">
