@@ -28,12 +28,12 @@ export async function GET() {
 
 /**
  * POST /api/tasks
- * Create a new task
+ * Create a new task from the frontend
  */
 export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json();
-		const {title, description} = body;
+		const {title, description, source} = body;
 
 		if (!title || typeof title !== "string" || title.trim().length === 0) {
 			return NextResponse.json(
@@ -45,23 +45,11 @@ export async function POST(request: NextRequest) {
 		const task = await taskService.createTask({
 			title: title.trim(),
 			description: description?.trim() || undefined,
+			source: source || "web", // Default to 'web' for frontend tasks
 		});
 
-		// Call n8n webhook with task id and title (non-blocking)
-		const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
-		if (n8nWebhookUrl) {
-			fetch(n8nWebhookUrl, {
-				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({
-					taskId: task.id,
-					title: task.title,
-				}),
-			}).catch((error) => {
-				console.error("Failed to call n8n webhook:", error);
-				// Don't throw - we don't want to fail task creation if webhook fails
-			});
-		}
+		// Do NOT auto-enhance for web tasks - user must click the button
+		// Only WhatsApp tasks get auto-enhanced via /api/todos/create
 
 		return NextResponse.json({task}, {status: 201});
 	} catch (error) {

@@ -4,11 +4,10 @@ import {useTasks} from "@/hooks/useTasks";
 import {TaskForm} from "@/components/TaskForm";
 import {TaskList} from "@/components/TaskList";
 import {CompletedTasks} from "@/components/CompletedTasks";
-import {useSyncExternalStore, useState, useEffect} from "react";
+import {useSyncExternalStore} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCloudArrowUp, faRobot} from "@fortawesome/free-solid-svg-icons";
+import {faCloudArrowUp} from "@fortawesome/free-solid-svg-icons";
 import {faWhatsapp} from "@fortawesome/free-brands-svg-icons";
-import {CreateTaskDto} from "@/models/task.model";
 
 function getSnapshot() {
 	return true;
@@ -22,23 +21,6 @@ export default function Home() {
 	const {tasks, loading, isSaving, error, createTask, updateTask, deleteTask, enhanceTask} =
 		useTasks();
 	const mounted = useSyncExternalStore(() => () => {}, getSnapshot, getServerSnapshot);
-	const [showAiNotification, setShowAiNotification] = useState(false);
-
-	// Auto-hide AI notification after 5 seconds
-	useEffect(() => {
-		if (showAiNotification) {
-			const timer = setTimeout(() => {
-				setShowAiNotification(false);
-			}, 5000);
-			return () => clearTimeout(timer);
-		}
-	}, [showAiNotification]);
-
-	const handleCreateTask = async (data: CreateTaskDto) => {
-		await createTask(data);
-		// Show AI enhancement notification
-		setShowAiNotification(true);
-	};
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
@@ -51,13 +33,6 @@ export default function Home() {
 							className="text-blue-500 animate-pulse"
 						/>
 						<span>Saving...</span>
-					</div>
-				)}
-				{/* AI Enhancement Notification */}
-				{showAiNotification && (
-					<div className="fixed top-4 left-0 right-0 mx-auto w-fit bg-blue-500 text-white rounded-lg shadow-lg px-4 py-3 flex items-center gap-2 text-sm animate-slide-down z-50">
-						<FontAwesomeIcon icon={faRobot} className="text-base" />
-						<span>Task sent to AI - will update in ~1 minute</span>
 					</div>
 				)}
 				<header className="text-center mb-8">
@@ -82,7 +57,7 @@ export default function Home() {
 					</a>
 				</header>
 				<div className="space-y-4">
-					<TaskForm onSubmit={handleCreateTask} />
+					<TaskForm onSubmit={createTask} />
 
 					{/* Active Tasks List Card */}
 					<div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5">

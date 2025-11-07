@@ -11,5 +11,6 @@ export interface ITaskRepository {
 	create(data: CreateTaskDto): Promise<Task>;
 	update(id: string, data: UpdateTaskDto): Promise<Task | null>;
 	enhance(id: string, data: EnhanceTaskDto): Promise<Task | null>;
+	setEnhancing(id: string, isEnhancing: boolean): Promise<Task | null>;
 	delete(id: string): Promise<boolean>;
 }

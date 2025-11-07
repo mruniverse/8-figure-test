@@ -3,7 +3,7 @@
 import {useState, useEffect} from "react";
 import {Task} from "@/models/task.model";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faTrash, faCheck} from "@fortawesome/free-solid-svg-icons";
+import {faTrash, faCheck, faWandMagicSparkles} from "@fortawesome/free-solid-svg-icons";
 import ReactMarkdown from "react-markdown";
 
 /**
@@ -20,7 +20,7 @@ interface TaskItemProps {
 	onEnhance: (id: string) => Promise<void>;
 }
 
-export function TaskItem({task, onUpdate, onDelete}: TaskItemProps) {
+export function TaskItem({task, onUpdate, onDelete, onEnhance}: TaskItemProps) {
 	const [isEditingTitle, setIsEditingTitle] = useState(false);
 	const [isEditingDescription, setIsEditingDescription] = useState(false);
 	const [editTitle, setEditTitle] = useState(task.title);
@@ -107,8 +107,23 @@ export function TaskItem({task, onUpdate, onDelete}: TaskItemProps) {
 		}
 	};
 
+	const handleEnhance = async () => {
+		try {
+			await onEnhance(task.id);
+		} catch (error) {
+			console.error("Failed to enhance task:", error);
+		}
+	};
+
+	// Apply glowing animation if task is enhancing
+	const containerClasses = `group rounded-xl border overflow-hidden flex items-stretch transition-all ${
+		task.isEnhancing
+			? "border-purple-400 shadow-lg animate-glow"
+			: "border-gray-200 hover:border-blue-300 hover:shadow-sm"
+	}`;
+
 	return (
-		<div className="group rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all overflow-hidden flex items-stretch">
+		<div className={containerClasses}>
 			<div className="flex flex-col gap-2 flex-1 py-3 pl-4 pr-2 bg-white rounded-l-xl">
 				<div className="flex items-center gap-3">
 					<button
@@ -191,6 +206,29 @@ export function TaskItem({task, onUpdate, onDelete}: TaskItemProps) {
 					</div>
 				)}
 			</div>
+
+			{/* Enhance button - only show for web tasks that aren't enhanced and aren't enhancing */}
+			{task.source === "web" && !task.enhanced && !task.isEnhancing && (
+				<button
+					onClick={handleEnhance}
+					title="Enhance with AI"
+					className="opacity-0 group-hover:opacity-100 px-5 bg-purple-500 hover:bg-purple-600 transition-all flex items-center justify-center cursor-pointer">
+					<FontAwesomeIcon
+						icon={faWandMagicSparkles}
+						className="w-3.5 h-3.5 text-white"
+					/>
+				</button>
+			)}
+
+			{/* Show indicator when enhancing - no pulse animation, just static icon */}
+			{task.isEnhancing && (
+				<div className="px-5 bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+					<FontAwesomeIcon
+						icon={faWandMagicSparkles}
+						className="w-3.5 h-3.5 text-white"
+					/>
+				</div>
+			)}
 
 			<button
 				onClick={handleDelete}

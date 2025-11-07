@@ -6,37 +6,40 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 // Task model matching the existing database structure
 model Task {
-  id                   String   @id @default(uuid())
-  title                String   @db.VarChar(255)
-  description          String?  @db.Text
-  completed            Boolean  @default(false)
-  enhanced             Boolean  @default(false)
-  enhancedDescription  String?  @db.Text @map("enhanced_description")
-  enhancementSteps     String[] @default([]) @map("enhancement_steps")
-  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                  String   @id @default(uuid())
+  title               String   @db.VarChar(255)
+  description         String?  @db.Text
+  completed           Boolean  @default(false)
+  enhanced            Boolean  @default(false)
+  enhancedDescription String?  @map("enhanced_description") @db.Text
+  enhancementSteps    String[] @default([]) @map("enhancement_steps")
+  source              String   @default("web") @db.VarChar(20)
+  isEnhancing         Boolean  @default(false) @map("is_enhancing")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([completed])
   @@index([createdAt])
+  @@index([source])
   @@map("tasks")
 }
 
 // WhatsApp chat session model
 model WhatsAppSession {
-  id              String   @id @default(uuid())
-  phoneNumber     String   @map("phone_number") @db.VarChar(50)
-  conversationId  String?  @map("conversation_id") @db.VarChar(255)
-  isActive        Boolean  @default(true) @map("is_active")
-  expiresAt       DateTime @map("expires_at") @db.Timestamptz(6)
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  lastMessageAt   DateTime @default(now()) @map("last_message_at") @db.Timestamptz(6)
+  id             String   @id @default(uuid())
+  phoneNumber    String   @map("phone_number") @db.VarChar(50)
+  conversationId String?  @map("conversation_id") @db.VarChar(255)
+  isActive       Boolean  @default(true) @map("is_active")
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastMessageAt  DateTime @default(now()) @map("last_message_at") @db.Timestamptz(6)
 
   @@index([phoneNumber, isActive])
   @@index([expiresAt])

@@ -55,6 +55,8 @@ export class PrismaTaskRepository implements ITaskRepository {
 				description: dto.description,
 				completed: false,
 				enhanced: false,
+				source: dto.source || "web",
+				isEnhancing: false,
 			},
 		});
 
@@ -91,6 +93,7 @@ export class PrismaTaskRepository implements ITaskRepository {
 					enhancedDescription: dto.enhancedDescription,
 					enhancementSteps: dto.enhancementSteps,
 					enhanced: true,
+					isEnhancing: false, // Enhancement complete
 				},
 			});
 
@@ -121,6 +124,24 @@ export class PrismaTaskRepository implements ITaskRepository {
 		}
 	}
 
+	async setEnhancing(id: string, isEnhancing: boolean): Promise<Task | null> {
+		try {
+			const task = await this.prisma.task.update({
+				where: {id},
+				data: {isEnhancing},
+			});
+
+			return this.mapToTask(task);
+		} catch (error) {
+			// Prisma throws P2025 if record not found
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			if ((error as any).code === "P2025") {
+				return null;
+			}
+			throw error;
+		}
+	}
+
 	/**
 	 * Maps a Prisma Task model to our domain Task model
 	 *
@@ -135,6 +156,8 @@ export class PrismaTaskRepository implements ITaskRepository {
 		enhanced: boolean;
 		enhancedDescription: string | null;
 		enhancementSteps: string[];
+		source: string;
+		isEnhancing: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 	}): Task {
@@ -147,6 +170,8 @@ export class PrismaTaskRepository implements ITaskRepository {
 			enhancedDescription: prismaTask.enhancedDescription,
 			enhancementSteps:
 				prismaTask.enhancementSteps.length > 0 ? prismaTask.enhancementSteps : null,
+			source: prismaTask.source as "web" | "whatsapp",
+			isEnhancing: prismaTask.isEnhancing,
 			createdAt: prismaTask.createdAt.toISOString(),
 			updatedAt: prismaTask.updatedAt.toISOString(),
 		};

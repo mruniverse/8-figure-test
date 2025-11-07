@@ -11,6 +11,8 @@ export interface Task {
 	enhanced: boolean;
 	enhancedDescription: string | null;
 	enhancementSteps: string[] | null;
+	source: "web" | "whatsapp";
+	isEnhancing: boolean;
 	createdAt: Date | string;
 	updatedAt: Date | string;
 }
@@ -21,6 +23,7 @@ export interface Task {
 export interface CreateTaskDto {
 	title: string;
 	description?: string;
+	source?: "web" | "whatsapp";
 }
 
 /**

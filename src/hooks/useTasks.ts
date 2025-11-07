@@ -48,6 +48,8 @@ function mapSupabaseToTask(row: Record<string, unknown>): Task {
 		enhanced: (row.enhanced as boolean) || false,
 		enhancedDescription: (row.enhanced_description as string) || null,
 		enhancementSteps: (row.enhancement_steps as string[]) || null,
+		source: ((row.source as string) || "web") as "web" | "whatsapp",
+		isEnhancing: (row.is_enhancing as boolean) || false,
 		createdAt: new Date(row.created_at as string),
 		updatedAt: new Date(row.updated_at as string),
 	};
@@ -96,6 +98,8 @@ export function useTasks() {
 			enhanced: false,
 			enhancedDescription: null,
 			enhancementSteps: null,
+			source: data.source || "web",
+			isEnhancing: false,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
@@ -211,10 +215,15 @@ export function useTasks() {
 
 	/**
 	 * Enhance a task with AI
-	 * Note: No optimistic update here as we need to wait for AI response
+	 * Uses optimistic update to show glowing state immediately
 	 */
 	const enhanceTask = useCallback(async (id: string) => {
-		// Background API call (no optimistic update - we need the AI result)
+		// Optimistic update: Set isEnhancing to true immediately
+		setTasks((prev) =>
+			prev.map((task) => (task.id === id ? {...task, isEnhancing: true} : task))
+		);
+
+		// Background API call
 		setIsSaving(true);
 		try {
 			const response = await fetch(`/api/tasks/${id}/enhance`, {
@@ -227,6 +236,10 @@ export function useTasks() {
 			setTasks((prev) => prev.map((task) => (task.id === id ? result.task : task)));
 			return result.task;
 		} catch (err) {
+			// Rollback on error
+			setTasks((prev) =>
+				prev.map((task) => (task.id === id ? {...task, isEnhancing: false} : task))
+			);
 			throw err;
 		} finally {
 			setIsSaving(false);

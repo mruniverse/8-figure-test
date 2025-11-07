@@ -305,7 +305,7 @@ npm run lint           # Run ESLint
 1. **Single Responsibility**: Each class/component has one reason to change
    - `TaskForm`: Handles task creation only
    - `TaskItem`: Displays and manages a single task
-   - `SupabaseTaskRepository`: Database operations only
+   - `PrismaTaskRepository`: Database operations only
 
 2. **Open/Closed**: Extend without modifying
    - Repository interface allows different implementations
