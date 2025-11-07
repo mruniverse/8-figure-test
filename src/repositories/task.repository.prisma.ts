@@ -71,6 +71,14 @@ export class PrismaTaskRepository implements ITaskRepository {
 					...(dto.title !== undefined && {title: dto.title}),
 					...(dto.description !== undefined && {description: dto.description}),
 					...(dto.isCompleted !== undefined && {completed: dto.isCompleted}),
+					...(dto.enhanced !== undefined && {enhanced: dto.enhanced}),
+					...(dto.isEnhancing !== undefined && {isEnhancing: dto.isEnhancing}),
+					...(dto.enhancedDescription !== undefined && {
+						enhancedDescription: dto.enhancedDescription,
+					}),
+					...(dto.enhancementSteps !== undefined && {
+						enhancementSteps: dto.enhancementSteps,
+					}),
 				},
 			});
 
