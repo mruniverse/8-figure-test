@@ -63,6 +63,12 @@ export async function PATCH(request: NextRequest, {params}: {params: Promise<{id
 
 		if (description !== undefined) {
 			updateData.description = typeof description === "string" ? description.trim() : "";
+			// When description is updated (n8n callback), stop the enhancing animation
+			updateData.enhanced = true;
+			updateData.isEnhancing = false;
+			console.log(
+				`[PATCH /api/tasks/${id}] Description updated, setting enhanced=true, isEnhancing=false`
+			);
 		}
 
 		if (isCompleted !== undefined) {
@@ -72,15 +78,9 @@ export async function PATCH(request: NextRequest, {params}: {params: Promise<{id
 			updateData.isCompleted = isCompleted;
 		}
 
+		// Allow explicit enhanced/isEnhancing control
 		if (enhanced !== undefined) {
 			updateData.enhanced = Boolean(enhanced);
-			// Automatically stop enhancing when task is marked as enhanced
-			if (enhanced === true && isEnhancing === undefined) {
-				updateData.isEnhancing = false;
-				console.log(
-					`[PATCH /api/tasks/${id}] Auto-setting isEnhancing=false (enhanced=true)`
-				);
-			}
 		}
 
 		if (isEnhancing !== undefined) {
