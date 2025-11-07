@@ -8,6 +8,7 @@ import {Task, CreateTaskDto, UpdateTaskDto} from "@/models/task.model";
 export function useTasks() {
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	/**
@@ -40,6 +41,7 @@ export function useTasks() {
 			title: data.title,
 			description: data.description || "",
 			isCompleted: false,
+			enhanced: false,
 			enhancedDescription: null,
 			enhancementSteps: null,
 			createdAt: new Date(),
@@ -49,6 +51,7 @@ export function useTasks() {
 		setTasks((prev) => [optimisticTask, ...prev]);
 
 		// Background API call
+		setIsSaving(true);
 		try {
 			const response = await fetch("/api/tasks", {
 				method: "POST",
@@ -69,6 +72,8 @@ export function useTasks() {
 			// Rollback on error
 			setTasks((prev) => prev.filter((task) => task.id !== optimisticTask.id));
 			throw err;
+		} finally {
+			setIsSaving(false);
 		}
 	}, []);
 
@@ -95,6 +100,7 @@ export function useTasks() {
 		});
 
 		// Background API call
+		setIsSaving(true);
 		try {
 			const response = await fetch(`/api/tasks/${id}`, {
 				method: "PATCH",
@@ -115,6 +121,8 @@ export function useTasks() {
 				setTasks((prev) => prev.map((task) => (task.id === id ? previousTask! : task)));
 			}
 			throw err;
+		} finally {
+			setIsSaving(false);
 		}
 	}, []);
 
@@ -132,6 +140,7 @@ export function useTasks() {
 		});
 
 		// Background API call
+		setIsSaving(true);
 		try {
 			const response = await fetch(`/api/tasks/${id}`, {
 				method: "DELETE",
@@ -143,6 +152,8 @@ export function useTasks() {
 			// Rollback on error
 			setTasks(previousTasks!);
 			throw err;
+		} finally {
+			setIsSaving(false);
 		}
 	}, []);
 
@@ -152,6 +163,7 @@ export function useTasks() {
 	 */
 	const enhanceTask = useCallback(async (id: string) => {
 		// Background API call (no optimistic update - we need the AI result)
+		setIsSaving(true);
 		try {
 			const response = await fetch(`/api/tasks/${id}/enhance`, {
 				method: "POST",
@@ -164,6 +176,8 @@ export function useTasks() {
 			return result.task;
 		} catch (err) {
 			throw err;
+		} finally {
+			setIsSaving(false);
 		}
 	}, []);
 
@@ -174,6 +188,7 @@ export function useTasks() {
 	return {
 		tasks,
 		loading,
+		isSaving,
 		error,
 		fetchTasks,
 		createTask,

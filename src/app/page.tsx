@@ -4,6 +4,8 @@ import {useTasks} from "@/hooks/useTasks";
 import {TaskForm} from "@/components/TaskForm";
 import {TaskList} from "@/components/TaskList";
 import {useSyncExternalStore} from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCloudArrowUp} from "@fortawesome/free-solid-svg-icons";
 
 function getSnapshot() {
 	return true;
@@ -14,12 +16,23 @@ function getServerSnapshot() {
 }
 
 export default function Home() {
-	const {tasks, loading, error, createTask, updateTask, deleteTask, enhanceTask} = useTasks();
+	const {tasks, loading, isSaving, error, createTask, updateTask, deleteTask, enhanceTask} =
+		useTasks();
 	const mounted = useSyncExternalStore(() => () => {}, getSnapshot, getServerSnapshot);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
 			<div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+				{/* Saving indicator */}
+				{isSaving && (
+					<div className="fixed top-4 right-4 bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 text-sm text-gray-600">
+						<FontAwesomeIcon
+							icon={faCloudArrowUp}
+							className="text-blue-500 animate-pulse"
+						/>
+						<span>Saving...</span>
+					</div>
+				)}
 				<header className="text-center mb-8">
 					<h1 className="text-4xl font-bold text-gray-800 mb-2">Today&apos;s Task</h1>
 					<p className="text-gray-500 text-sm">
