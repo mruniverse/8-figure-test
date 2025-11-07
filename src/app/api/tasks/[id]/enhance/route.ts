@@ -11,12 +11,15 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{id:
 	try {
 		const {id} = await params;
 
+		console.log(`[POST /api/tasks/${id}/enhance] Starting enhancement...`);
+
 		// Check if task exists
 		const task = await prisma.task.findUnique({
 			where: {id},
 		});
 
 		if (!task) {
+			console.log(`[POST /api/tasks/${id}/enhance] Task not found`);
 			return NextResponse.json({error: "Task not found"}, {status: 404});
 		}
 
@@ -25,6 +28,9 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{id:
 			where: {id},
 			data: {isEnhancing: true},
 		});
+
+		console.log(`[POST /api/tasks/${id}/enhance] Set isEnhancing=true, calling webhook...`);
+		console.log(`[POST /api/tasks/${id}/enhance] Webhook URL: ${N8N_ENHANCEMENT_WEBHOOK}`);
 
 		// Trigger AI enhancement via n8n webhook (non-blocking)
 		if (N8N_ENHANCEMENT_WEBHOOK) {
@@ -36,16 +42,38 @@ export async function POST(request: NextRequest, {params}: {params: Promise<{id:
 					title: task.title,
 				}),
 				signal: AbortSignal.timeout(10000), // 10 second timeout
-			}).catch((err) => {
-				console.error("[error] Enhancement webhook failed:", err);
-				// Reset isEnhancing if webhook fails
-				prisma.task
-					.update({
-						where: {id: task.id},
-						data: {isEnhancing: false},
-					})
-					.catch((e) => console.error("[error] Failed to reset isEnhancing:", e));
-			});
+			})
+				.then((res) => {
+					console.log(
+						`[POST /api/tasks/${id}/enhance] Webhook responded: ${res.status} ${res.statusText}`
+					);
+					return res.text();
+				})
+				.then((body) => {
+					console.log(`[POST /api/tasks/${id}/enhance] Webhook response body:`, body);
+				})
+				.catch((err) => {
+					console.error(
+						`[POST /api/tasks/${id}/enhance] Enhancement webhook failed:`,
+						err
+					);
+					// Reset isEnhancing if webhook fails
+					prisma.task
+						.update({
+							where: {id: task.id},
+							data: {isEnhancing: false},
+						})
+						.catch((e) =>
+							console.error(
+								`[POST /api/tasks/${id}/enhance] Failed to reset isEnhancing:`,
+								e
+							)
+						);
+				});
+		} else {
+			console.error(
+				`[POST /api/tasks/${id}/enhance] N8N_ENHANCEMENT_WEBHOOK not configured!`
+			);
 		}
 
 		return NextResponse.json({task: updatedTask}, {status: 200});

@@ -39,12 +39,16 @@ export async function PATCH(request: NextRequest, {params}: {params: Promise<{id
 	try {
 		const {id} = await params;
 		const body = await request.json();
-		const {title, description, isCompleted} = body;
+		const {title, description, isCompleted, enhanced, isEnhancing} = body;
+
+		console.log(`[PATCH /api/tasks/${id}] Received update:`, body);
 
 		const updateData: {
 			title?: string;
 			description?: string;
 			isCompleted?: boolean;
+			enhanced?: boolean;
+			isEnhancing?: boolean;
 		} = {};
 
 		if (title !== undefined) {
@@ -68,7 +72,19 @@ export async function PATCH(request: NextRequest, {params}: {params: Promise<{id
 			updateData.isCompleted = isCompleted;
 		}
 
+		if (enhanced !== undefined) {
+			updateData.enhanced = Boolean(enhanced);
+		}
+
+		if (isEnhancing !== undefined) {
+			updateData.isEnhancing = Boolean(isEnhancing);
+		}
+
 		const task = await taskService.updateTask(id, updateData);
+		console.log(`[PATCH /api/tasks/${id}] Task updated successfully:`, {
+			enhanced: task.enhanced,
+			isEnhancing: task.isEnhancing,
+		});
 		return NextResponse.json({task}, {status: 200});
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : "Unknown error";

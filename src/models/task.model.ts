@@ -33,6 +33,10 @@ export interface UpdateTaskDto {
 	title?: string;
 	description?: string;
 	isCompleted?: boolean;
+	enhanced?: boolean;
+	isEnhancing?: boolean;
+	enhancedDescription?: string;
+	enhancementSteps?: string[];
 }
 
 /**
