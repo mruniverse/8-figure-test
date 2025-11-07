@@ -62,7 +62,7 @@ export function TaskForm({onSubmit}: TaskFormProps) {
 					<button
 						type="submit"
 						disabled={isSubmitting}
-						className="px-6 bg-blue-500 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-white font-medium text-sm rounded-r-xl">
+						className="px-6 bg-blue-500 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-white font-medium text-sm rounded-r-xl cursor-pointer disabled:cursor-not-allowed">
 						<FontAwesomeIcon icon={faPlus} className="w-3.5 h-3.5" />
 						<span>Add</span>
 					</button>

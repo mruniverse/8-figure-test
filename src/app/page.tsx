@@ -3,6 +3,7 @@
 import {useTasks} from "@/hooks/useTasks";
 import {TaskForm} from "@/components/TaskForm";
 import {TaskList} from "@/components/TaskList";
+import {CompletedTasks} from "@/components/CompletedTasks";
 import {useSyncExternalStore, useState, useEffect} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloudArrowUp, faRobot} from "@fortawesome/free-solid-svg-icons";
@@ -73,7 +74,7 @@ export default function Home() {
 				<div className="space-y-4">
 					<TaskForm onSubmit={handleCreateTask} />
 
-					{/* Tasks List Card */}
+					{/* Active Tasks List Card */}
 					<div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-5">
 						{error && (
 							<div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm mb-4">
@@ -94,6 +95,16 @@ export default function Home() {
 							/>
 						)}
 					</div>
+
+					{/* Completed Tasks - Expandable */}
+					{!loading && (
+						<CompletedTasks
+							tasks={tasks.filter((t) => t.isCompleted)}
+							onUpdate={updateTask}
+							onDelete={deleteTask}
+							onEnhance={enhanceTask}
+						/>
+					)}
 				</div>{" "}
 				<footer className="mt-6 text-center">
 					<p className="text-gray-400 text-xs">

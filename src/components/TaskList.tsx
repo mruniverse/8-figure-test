@@ -18,17 +18,20 @@ interface TaskListProps {
 }
 
 export function TaskList({tasks, onUpdate, onDelete, onEnhance}: TaskListProps) {
-	if (tasks.length === 0) {
+	// Filter to only show incomplete tasks
+	const incompleteTasks = tasks.filter((task) => !task.isCompleted);
+
+	if (incompleteTasks.length === 0) {
 		return (
 			<div className="text-center py-12">
-				<p className="text-gray-400 text-sm">No tasks yet. Add your first task above!</p>
+				<p className="text-gray-400 text-sm">No active tasks. Add your first task above!</p>
 			</div>
 		);
 	}
 
 	return (
 		<div className="space-y-3">
-			{tasks.map((task) => (
+			{incompleteTasks.map((task) => (
 				<TaskItem
 					key={task.id}
 					task={task}
