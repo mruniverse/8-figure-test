@@ -50,7 +50,17 @@ export async function POST(request: NextRequest) {
 					taskId: newTodo.id,
 					title: newTodo.title,
 				}),
-			}).catch((err) => console.error("Enhancement webhook failed:", err));
+				signal: AbortSignal.timeout(10000), // 10 second timeout
+			}).catch((err) => {
+				console.error("[error] Enhancement webhook failed:", err);
+				// Reset isEnhancing if webhook fails
+				prisma.task
+					.update({
+						where: {id: newTodo.id},
+						data: {isEnhancing: false},
+					})
+					.catch((e) => console.error("[error] Failed to reset isEnhancing:", e));
+			});
 		}
 
 		return NextResponse.json({
