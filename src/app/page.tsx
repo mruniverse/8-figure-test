@@ -7,6 +7,7 @@ import {CompletedTasks} from "@/components/CompletedTasks";
 import {useSyncExternalStore, useState, useEffect} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloudArrowUp, faRobot} from "@fortawesome/free-solid-svg-icons";
+import {faWhatsapp} from "@fortawesome/free-brands-svg-icons";
 import {CreateTaskDto} from "@/models/task.model";
 
 function getSnapshot() {
@@ -61,7 +62,7 @@ export default function Home() {
 				)}
 				<header className="text-center mb-8">
 					<h1 className="text-4xl font-bold text-gray-800 mb-2">Today&apos;s Task</h1>
-					<p className="text-gray-500 text-sm">
+					<p className="text-gray-500 text-sm mb-4">
 						{mounted
 							? new Date().toLocaleDateString("en-US", {
 									weekday: "long",
@@ -70,6 +71,15 @@ export default function Home() {
 							  })
 							: "\u00A0"}
 					</p>
+					{/* WhatsApp Button */}
+					<a
+						href="https://wa.me/5518997269664?text=%23todolist"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+						<FontAwesomeIcon icon={faWhatsapp} className="text-xl" />
+						<span>Connect via WhatsApp</span>
+					</a>
 				</header>
 				<div className="space-y-4">
 					<TaskForm onSubmit={handleCreateTask} />

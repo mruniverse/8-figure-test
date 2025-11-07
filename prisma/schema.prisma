@@ -27,3 +27,19 @@ model Task {
   @@index([createdAt])
   @@map("tasks")
 }
+
+// WhatsApp chat session model
+model WhatsAppSession {
+  id              String   @id @default(uuid())
+  phoneNumber     String   @map("phone_number") @db.VarChar(50)
+  conversationId  String?  @map("conversation_id") @db.VarChar(255)
+  isActive        Boolean  @default(true) @map("is_active")
+  expiresAt       DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastMessageAt   DateTime @default(now()) @map("last_message_at") @db.Timestamptz(6)
+
+  @@index([phoneNumber, isActive])
+  @@index([expiresAt])
+  @@index([conversationId])
+  @@map("whatsapp_sessions")
+}
