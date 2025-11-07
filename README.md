@@ -2,6 +2,10 @@
 
 DEMO: https://8-figure-test-vjnj.vercel.app/
 
+### N8N Workflow:
+<img width="1075" height="569" alt="image" src="https://github.com/user-attachments/assets/3f959037-837a-4a1d-b701-e911408eed5e" />
+
+
 A full-stack to-do list application with AI enhancement features, built with Next.js, Prisma, Supabase, and n8n. This project demonstrates clean, modular, and scalable code following **SOLID principles**.
 
 ## 🚀 Features
