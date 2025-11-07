@@ -93,7 +93,7 @@ export class SupabaseTaskRepository implements ITaskRepository {
 	/**
 	 * Update an existing task
 	 */
-	async update(id: string, dto: UpdateTaskDto): Promise<Task> {
+	async update(id: string, dto: UpdateTaskDto): Promise<Task | null> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const updateData: any = {
 			updated_at: new Date().toISOString(),
@@ -114,6 +114,9 @@ export class SupabaseTaskRepository implements ITaskRepository {
 			.single();
 
 		if (error) {
+			if (error.code === "PGRST116") {
+				return null; // Not found
+			}
 			throw new Error(`Failed to update task: ${error.message}`);
 		}
 
@@ -123,7 +126,7 @@ export class SupabaseTaskRepository implements ITaskRepository {
 	/**
 	 * Enhance task with AI-generated content
 	 */
-	async enhance(id: string, dto: EnhanceTaskDto): Promise<Task> {
+	async enhance(id: string, dto: EnhanceTaskDto): Promise<Task | null> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const updateData: any = {
 			enhanced_description: dto.enhancedDescription,
@@ -142,6 +145,9 @@ export class SupabaseTaskRepository implements ITaskRepository {
 			.single();
 
 		if (error) {
+			if (error.code === "PGRST116") {
+				return null; // Not found
+			}
 			throw new Error(`Failed to enhance task: ${error.message}`);
 		}
 
