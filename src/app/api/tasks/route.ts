@@ -47,6 +47,22 @@ export async function POST(request: NextRequest) {
 			description: description?.trim() || undefined,
 		});
 
+		// Call n8n webhook with task id and title (non-blocking)
+		const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
+		if (n8nWebhookUrl) {
+			fetch(n8nWebhookUrl, {
+				method: "POST",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({
+					taskId: task.id,
+					title: task.title,
+				}),
+			}).catch((error) => {
+				console.error("Failed to call n8n webhook:", error);
+				// Don't throw - we don't want to fail task creation if webhook fails
+			});
+		}
+
 		return NextResponse.json({task}, {status: 201});
 	} catch (error) {
 		console.error("Failed to create task:", error);

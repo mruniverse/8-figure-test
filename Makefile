@@ -71,43 +71,43 @@ restart: down up
 # View logs
 logs:
 	@echo "$(CYAN)Showing container logs (Ctrl+C to exit)...$(NC)"
-	docker-compose -f docker/compose.yaml logs -f
+	docker-compose -f docker/compose.yaml -p $(REPO_NAME) logs -f
 
 # Open shell in Next.js container
 shell:
 	@echo "$(CYAN)Opening shell in Next.js container...$(NC)"
-	docker exec -it todolist-nextjs-dev sh
+	docker exec -it 8figure-todolist sh
 
 # Generate Prisma Client
 prisma-generate:
 	@echo "$(CYAN)Generating Prisma Client...$(NC)"
-	docker exec -it todolist-nextjs-dev npx prisma generate
+	docker exec -it 8figure-todolist npx prisma generate
 	@echo "$(GREEN)✓ Prisma Client generated$(NC)"
 
 # Run Prisma migrations (production)
 prisma-migrate:
 	@echo "$(CYAN)Running Prisma migrations...$(NC)"
-	docker exec -it todolist-nextjs-dev npx prisma migrate deploy
+	docker exec -it 8figure-todolist npx prisma migrate deploy
 	@echo "$(GREEN)✓ Migrations applied$(NC)"
 
 # Create and run new migration (development)
 prisma-migrate-dev:
 	@echo "$(CYAN)Creating and applying new migration...$(NC)"
 	@read -p "Enter migration name: " migration_name; \
-	docker exec -it todolist-nextjs-dev npx prisma migrate dev --name $$migration_name
+	docker exec -it 8figure-todolist npx prisma migrate dev --name $$migration_name
 	@echo "$(GREEN)✓ Migration created and applied$(NC)"
 
 # Open Prisma Studio
 prisma-studio:
 	@echo "$(CYAN)Opening Prisma Studio at http://localhost:5555...$(NC)"
-	docker exec -it todolist-nextjs-dev npx prisma studio
+	docker exec -it 8figure-todolist npx prisma studio
 
 # Reset database (WARNING: deletes all data)
 prisma-reset:
 	@echo "$(RED)WARNING: This will delete all data!$(NC)"
 	@read -p "Are you sure? (y/N): " confirm; \
 	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
-		docker exec -it todolist-nextjs-dev npx prisma migrate reset --force; \
+		docker exec -it 8figure-todolist npx prisma migrate reset --force; \
 		echo "$(GREEN)✓ Database reset$(NC)"; \
 	else \
 		echo "$(YELLOW)Aborted$(NC)"; \
@@ -116,7 +116,7 @@ prisma-reset:
 # Push schema changes without creating migration
 prisma-push:
 	@echo "$(CYAN)Pushing schema changes to database...$(NC)"
-	docker exec -it todolist-nextjs-dev npx prisma db push
+	docker exec -it 8figure-todolist npx prisma db push
 	@echo "$(GREEN)✓ Schema pushed$(NC)"
 
 # Clean containers and volumes
@@ -142,4 +142,4 @@ install:
 # Run tests (placeholder for future)
 test:
 	@echo "$(CYAN)Running tests...$(NC)"
-	docker exec -it todolist-nextjs-dev npm test
+	docker exec -it 8figure-todolist npm test
